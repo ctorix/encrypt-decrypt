@@ -54,7 +54,7 @@ then
     then
         mkdir -p ${DESDIR}
         # Check to see if dir was created successfully
-        if [ #? -eq 1 ]
+        if [ $? -eq 1 ]
         then
             echo
             echo "${txtbld}${txtred}mkdir of ${txtrst}${DESDIR} ${txtbld}${txtred}failed! Check your permissions.${txtrst}"
