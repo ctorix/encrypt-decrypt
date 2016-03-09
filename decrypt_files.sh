@@ -2,7 +2,7 @@
 #Purpose = Decrypt files encrypted with a public gpg key
 #Created on 03-04-2016
 #Author = Cade Torix
-#Version 1.2
+#Version 1.2.1
 #START
 
 # Set start time
@@ -106,6 +106,7 @@ then
             fi
         else
             echo "${txtbld}${txtred}Export of ${OUTPUT} to ${DESDIR} failed!${txtrst}"
+            exit 1
         fi
     else
         exit 0

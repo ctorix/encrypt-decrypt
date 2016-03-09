@@ -2,7 +2,7 @@
 #Purpose = tar and encrypt with a public gpg key
 #Created on 03-04-2016
 #Author = Cade Torix
-#Version 1.2
+#Version 1.2.1
 #START
 
 # Set start time
@@ -22,7 +22,7 @@ EXTENSION="_${DATE}.tar.xz.gpg"	# Setting the file extension
 if [ $# != 4 ]
 then
     echo
-    echo Usage: "${txtbld}${txtred}./encrypt_files.sh [source dir/file] [destination dir] [filename (excluding extension)] (${EXTENSION} will be appended to the end of the supplied FILENAME) [recipient email or key]${txtrst}"
+    echo "Usage: ${txtbld}${txtred}./encrypt_files.sh [source dir/file] [destination dir] [filename (excluding extension)] (${EXTENSION} will be appended to the end of the supplied FILENAME) [recipient email or key]${txtrst}"
     echo
     exit 1
 fi
@@ -42,7 +42,7 @@ FILENAME="${3}"			# [filename (excluding extension)]
 SAVEAS="${2}${3}${EXTENSION}"	# [destination dir]/[filename][extension]
 RECIPIENT="${4}"		# Recipient's public GPG key or email address
 
-# Chec to see of the {DESDIR} exists
+# Check to see of the {DESDIR} exists
 if [ ! -d ${DESDIR} ]
 then
     echo
@@ -52,7 +52,19 @@ then
     read answer
     if [ ${answer} = 'Y' ]
     then
-        mkdir -pv ${DESDIR}
+        mkdir -p ${DESDIR}
+        # Check to see if dir was created successfully
+        if [ #? -eq 1 ]
+        then
+            echo
+            echo "${txtbld}${txtred}mkdir of ${txtrst}${DESDIR} ${txtbld}${txtred}failed! Check your permissions.${txtrst}"
+            echo
+            exit 1
+        else
+            echo
+            echo "mkdir of ${DESDIR} completed successfully"
+            echo
+        fi
     else
         echo
         echo "${txtbld}${txtred}Creation of ${DESDIR} declined... exiting...${txtrst}"
@@ -61,11 +73,11 @@ then
     fi
 fi
 
-# Check to see if the {SOURCE} is ~/
+# Check to see if the {SOURCE} is ~/.  If so, assumes to exclude ~/VirtualBox_VMs and ~/Truecrypt_Volumes
 if [ ${SOURCE} = ~/ ]
 then
     echo
-    echo The SOURCE is ~/ so excluding VirtualBox VMs and Truecrypt volumes.
+    echo The SOURCE is ~/ so excluding VirtualBox_VMs and Truecrypt_Volumes.
     echo
     echo "All error checking passed, encrypting tarball with ${RECIPIENT} public gpg key"
     echo
