@@ -42,7 +42,7 @@ FILENAME="${3}"			# [filename (excluding extension)]
 SAVEAS="${2}${3}${EXTENSION}"	# [destination dir]/[filename][extension]
 RECIPIENT="${4}"		# Recipient's public GPG key or email address
 
-# Check to see of the {DESDIR} exists
+# Check to see of the {DESDIR} exists and you have write permissions
 if [ ! -w ${DESDIR} ]
 then
     echo
