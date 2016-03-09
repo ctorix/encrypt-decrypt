@@ -43,10 +43,10 @@ SAVEAS="${2}${3}${EXTENSION}"	# [destination dir]/[filename][extension]
 RECIPIENT="${4}"		# Recipient's public GPG key or email address
 
 # Check to see of the {DESDIR} exists
-if [ ! -d ${DESDIR} ]
+if [ ! -w ${DESDIR} ]
 then
     echo
-    echo "${txtbld}${txtred}Destination directory ${DESDIR} does not exist!${txtrst}"
+    echo "${txtbld}${txtred}Destination directory ${DESDIR} does not exist or you do not have write permissions!${txtrst}"
     echo
     echo 'Create it? (Y/n)'
     read answer
