@@ -2,7 +2,6 @@
 #Purpose = Decrypt files encrypted with a public gpg key
 #Created on 03-04-2016
 #Author = Cade Torix
-#Version 1.3
 #START
 
 # Set start time
@@ -15,6 +14,9 @@ txtrst=$(tput sgr0)       # Text reset
 
 # Syntax of simple decryption and extraction
 # gpg -d ${DECRYPT} | tar -xpJf - -C ${DESDIR}
+
+# Syntax for decrypt only
+# gpg -o ${OUTPUT} -d ${DECRYPT}
 
 # Function to verify previous task completed successfully
 verify () {
@@ -29,6 +31,15 @@ else
     echo
     exit 1
 fi
+}
+
+# Function to determine time taken to complete decryption/extraction
+time_taken () {
+END=$(date +%s)
+DIFF=$(( ${END} - ${START} ))
+TOTALTIME=$(( ${DIFF} / 60 ))
+echo "Total time: ${TOTALTIME} minutes."
+echo
 }
 
 # Check to see if extract directory was supplied
@@ -73,8 +84,22 @@ fi
 
 # Set variables
 DECRYPT="${1}"	# [file to decrypt]
+OUTPUT=$(echo ${DECRYPT} | cut -f -3 -d '.')	#used for Decrypt Only option
+
+# Prompt for decryption only
+echo
+echo "Only decrypt ${DECRYPT} as ${OUTPUT}? (Y/n)"
+read answer
+if [ ${answer} = 'Y' ]
+then
+    gpg -o ${OUTPUT} -d ${DECRYPT}
+    verify
+    time_taken
+    exit 0
+fi
 
 # Prompt to delete encrypted tarball after decrypt and extraction
+echo
 echo "Delete encrypted tarball ${DECRYPT} after decrypt and extraction? (Y/n)"
 read answer
 if [ ${answer} = 'Y' ]
@@ -86,11 +111,5 @@ fi
 
 # Check to see if decrypt/extract & delete (if applicable) completed successfully
 verify
-
-# Set end time and calculate total script time
-END=$(date +%s)
-DIFF=$(( ${END} - ${START} ))
-TOTALTIME=$(( ${DIFF} / 60 ))
-echo "Total time: ${TOTALTIME} minutes."
-echo
+time_taken
 #END

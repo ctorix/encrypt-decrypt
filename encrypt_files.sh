@@ -2,7 +2,6 @@
 #Purpose = tar and encrypt with a public gpg key
 #Created on 03-04-2016
 #Author = Cade Torix
-#Version 1.2.1
 #START
 
 # Set start time
@@ -46,9 +45,9 @@ RECIPIENT="${4}"		# Recipient's public GPG key or email address
 if [ ! -w ${DESDIR} ]
 then
     echo
-    echo "${txtbld}${txtred}Destination directory ${DESDIR} does not exist or you do not have write permissions!${txtrst}"
+    echo "${txtbld}${txtred}Destination directory${txtrst} ${DESDIR} ${txtbld}${txtred}does not exist or you do not have write permissions!${txtrst}"
     echo
-    echo 'Create it? (Y/n)'
+    echo 'Attempt to create it? (Y/n)'
     read answer
     if [ ${answer} = 'Y' ]
     then
@@ -57,17 +56,17 @@ then
         if [ $? -eq 1 ]
         then
             echo
-            echo "${txtbld}${txtred}mkdir of ${txtrst}${DESDIR} ${txtbld}${txtred}failed! Check your permissions.${txtrst}"
+            echo "${txtbld}${txtred}Creation of${txtrst} ${DESDIR} ${txtbld}${txtred}failed! Check your permissions.${txtrst}"
             echo
             exit 1
         else
             echo
-            echo "mkdir of ${DESDIR} completed successfully"
+            echo "${DESDIR} created successfully"
             echo
         fi
     else
         echo
-        echo "${txtbld}${txtred}Creation of ${DESDIR} declined... exiting...${txtrst}"
+        echo "${txtbld}${txtred}Creation of${txtrst} ${DESDIR} ${txtbld}${txtred}declined... exiting...${txtrst}"
         echo
         exit 1
     fi
