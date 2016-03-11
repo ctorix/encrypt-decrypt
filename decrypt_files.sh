@@ -90,19 +90,29 @@ then
 fi
 
 # Set variables
-DECRYPT="${1}"	# [file to decrypt]
-OUTPUT=$(echo ${DECRYPT} | cut -f -3 -d '.')	#used for Decrypt Only option
+DECRYPT="${1}"			# [file to decrypt]
+DECRYPTED=${DECRYPT%.*}		# Removes .gpg from encrypted filename leaving .tar.xz (decryption only option)
+OUTPUT=$(basename ${DECRYPTED})	# Removes path from {DECRYPTED} leaving just filename (decryption only option)
 
 # Prompt for decryption only
 # Variables for success/failure
 SUCCESS="Decrypted ${DECRYPT} successfully and saved it as ${DESDIR}${OUTPUT}"
 FAILED="${txtbld}${txtred}Decryption of${txtrst} ${DECRYPT} ${txtbld}${txtred}failed!${txtrst}"
 echo
-echo "Only decrypt ${DECRYPT} as ${OUTPUT} (no extraction)? (Y/n)"
+echo "Only decrypt ${DECRYPT} as ${DESDIR}${OUTPUT} (no extraction)? (Y/n)"
 read answer
 if [ ${answer} = 'Y' ]
 then
-    gpg -o ${DESDIR}${OUTPUT} -d ${DECRYPT}
+    # Prompt to delete encrypted tarball ${DECRYPT} after decrypt
+    echo
+    echo "Delete encrypted tarball ${DECRYPT} after decryption? (Y/n)"
+    read answer
+    if [ ${answer} = 'Y' ]
+    then
+        gpg -o ${DESDIR}${OUTPUT} -d ${DECRYPT} && rm ${DECRYPT}
+    else
+        gpg -o ${DESDIR}${OUTPUT} -d ${DECRYPT}
+    fi    
     verify
     time_taken
     exit 0
