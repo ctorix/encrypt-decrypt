@@ -41,7 +41,34 @@ FILENAME="${3}"			# [filename (excluding extension)]
 SAVEAS="${2}${3}${EXTENSION}"	# [destination dir]/[filename][extension]
 RECIPIENT="${4}"		# Recipient's public GPG key or email address
 
+# Function to verify previous task completed successfully
+verify () {
+if [ $? -eq 0 ]
+then
+    echo
+    echo "${SUCCESS}"
+    echo
+else
+    echo
+    echo "${txtbld}${txtred}${FAILED}${txtrst}"
+    echo
+    exit 1
+fi
+}
+
+# Function to determine time taken to complete decryption/extraction
+time_taken () {
+END=$(date +%s)
+DIFF=$(( ${END} - ${START} ))
+TOTALTIME=$(( ${DIFF} / 60 ))
+echo "Total time: ${TOTALTIME} minutes."
+echo
+}
+
 # Check to see of the {DESDIR} exists and you have write permissions
+# Variables for success/failure
+SUCCESS="${DESDIR} created successfully"
+FAILED="Creation of ${DESDIR} failed! Check your permissions."
 if [ ! -w ${DESDIR} ]
 then
     echo
@@ -52,18 +79,8 @@ then
     if [ ${answer} = 'Y' ]
     then
         mkdir -p ${DESDIR}
-        # Check to see if dir was created successfully
-        if [ $? -eq 1 ]
-        then
-            echo
-            echo "${txtbld}${txtred}Creation of${txtrst} ${DESDIR} ${txtbld}${txtred}failed! Check your permissions.${txtrst}"
-            echo
-            exit 1
-        else
-            echo
-            echo "${DESDIR} created successfully"
-            echo
-        fi
+        # Check to see if directory was created successfully
+        verify
     else
         echo
         echo "${txtbld}${txtred}Creation of${txtrst} ${DESDIR} ${txtbld}${txtred}declined... exiting...${txtrst}"
@@ -73,6 +90,9 @@ then
 fi
 
 # Check to see if the {SOURCE} is ~/.  If so, assumes to exclude ~/VirtualBox_VMs and ~/Truecrypt_Volumes
+# Variables for success/failure
+SUCCESS="Encrypted tarball of ${SOURCE} completed successfully and saved as ${SAVEAS}."
+FAILED="Tarball and encryption of ${SOURCE} failed!"
 if [ ${SOURCE} = ~/ ]
 then
     echo
@@ -91,43 +111,25 @@ else
 fi
 
 # Check to see if tarball encryption was a success
-if [ $? -eq 0 ]
+verify
+
+# Prompt to sign with detached signature
+# Variables for success/failure
+SUCCESS='GPG signature successful'
+FAILED='GPG signature failed!'
+echo
+echo 'Sign it with detached signature? (Y/n)'
+read answer
+if [ ${answer} = 'Y' ]
 then
-    echo
-    echo "Encrypted tarball of ${SOURCE} completed successfully and saved as ${SAVEAS}."
-    echo 'Sign it with detached signature? (Y/n)'
-    # To sign or not to sign that is the detached question
-    read answer
-    if [ ${answer} = 'Y' ]
-    then
-        gpg --armor --detach-sig ${SAVEAS}
-        # Check to see if signing was successful
-        if [ $? -eq 0 ]
-        then
-            echo
-            echo 'GPG signature successful'
-            echo
-        else
-            echo
-            echo "${txtbld}${txtred}GPG signature failed!${txtrst}"
-            echo
-            exit 1
-        fi
-    else
-        exit 0
-    fi
+    gpg --armor --detach-sig ${SAVEAS}
 else
     echo
-    echo "${txtbld}${txtred}Tarball and encryption of ${SOURCE} failed!${txtrst}"
-    echo
-    exit 1
+    time_taken
+    exit 0
 fi
 
-# Set end time and calculate total script time
-END=$(date +%s)
-DIFF=$(( ${END} - ${START} ))
-TOTALTIME=$(( ${DIFF} / 60 ))
-echo
-echo "Total time: ${TOTALTIME} minutes."
-echo
+# Check to see if signing succeeded
+verify
+time_taken
 #END

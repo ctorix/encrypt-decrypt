@@ -23,11 +23,11 @@ verify () {
 if [ $? -eq 0 ]
 then
     echo
-    echo 'Successful'
+    echo "${SUCCESS}"
     echo
 else
     echo
-    echo "${txtbld}${txtred}Failed!${txtrst}"
+    echo "${txtbld}${txtred}${FAILED}${txtrst}"
     echo
     exit 1
 fi
@@ -50,36 +50,43 @@ else
     DESDIR="${2}"
 fi
 
+# Check to see number of arguments provided for [file to decrypt] and [extract dir]
+if [ $# = 1 ]
+then
+    echo
+    echo "${txtbld}${txtred}No extract directory provided!${txtrst}"
+    echo "${txtbld}${txtred}Extraction will be to:${txtrst} ${DESDIR}"
+    echo
+elif [ $# != 2 ]
+then
+    echo
+    echo "Usage: ${txtbld}${txtred}./decrypt_files.sh [file to decrypt] (optional: [extract dir])${txtrst}"
+    echo
+    exit 1
+fi
+
 # Check to see if {DESDIR} exists and is writable
+# Variables for success/failure
+SUCCESS="Creation of ${DESDIR} successful"
+FAILED="Creation of ${DESDIR} failed! Check your permissions"
 if [ ! -w ${DESDIR} ]
 then
     echo
     echo "${DESDIR} ${txtbld}${txtred}does not exist or you do not have write permissions!${txtrst}"
-    echo 'Attempt to create it? (Y/n)'
     # Offer to create ${DESDIR}
+    echo
+    echo 'Attempt to create it? (Y/n)'
     read answer
     if [ ${answer} = 'Y' ]
     then
         mkdir -p ${DESDIR}
         verify
     else
+        echo
+        echo "${txtbld}${txtred}Creation of${txtrst} ${DESDIR} ${txtbld}${txtred}declined... exiting...${txtrst}"
+        echo
         exit 1
     fi
-fi
-
-# Check to see number of arguments provided for [file to decrypt] and [extract dir]
-if [ $# = 1 ]
-then
-    echo
-    echo "${txtbld}${txtred}No extract directory provided!${txtrst}"
-    echo "${txtbld}${txtred}Extraction will be to: ${txtrst}${DESDIR}"
-    echo
-elif [ $# != 2 ]
-then
-    echo
-    echo Usage: "${txtbld}${txtred}./decrypt_files.sh [file to decrypt] (optional: [extract dir])${txtrst}"
-    echo
-    exit 1
 fi
 
 # Set variables
@@ -87,18 +94,24 @@ DECRYPT="${1}"	# [file to decrypt]
 OUTPUT=$(echo ${DECRYPT} | cut -f -3 -d '.')	#used for Decrypt Only option
 
 # Prompt for decryption only
+# Variables for success/failure
+SUCCESS="Decrypted ${DECRYPT} successfully and saved it as ${DESDIR}${OUTPUT}"
+FAILED="Decryption of ${DECRYPT} failed!"
 echo
-echo "Only decrypt ${DECRYPT} as ${OUTPUT}? (Y/n)"
+echo "Only decrypt ${DECRYPT} as ${OUTPUT} (no extraction)? (Y/n)"
 read answer
 if [ ${answer} = 'Y' ]
 then
-    gpg -o ${OUTPUT} -d ${DECRYPT}
+    gpg -o ${DESDIR}${OUTPUT} -d ${DECRYPT}
     verify
     time_taken
     exit 0
 fi
 
 # Prompt to delete encrypted tarball after decrypt and extraction
+# Variables for success/failure
+SUCCESS="Decrypted ${DECRYPT} successfully to ${DESDIR}"
+FAILED="Decryption of ${DECRYPT} failed!"
 echo
 echo "Delete encrypted tarball ${DECRYPT} after decrypt and extraction? (Y/n)"
 read answer
