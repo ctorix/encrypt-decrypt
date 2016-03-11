@@ -21,7 +21,7 @@ EXTENSION="_${DATE}.tar.xz.gpg"	# Setting the file extension
 if [ $# != 4 ]
 then
     echo
-    echo "Usage: ${txtbld}${txtred}./encrypt_files.sh [source dir/file] [destination dir] [filename (excluding extension)] (${EXTENSION} will be appended to the end of the supplied FILENAME) [recipient email or key]${txtrst}"
+    echo "Usage: ${txtbld}${txtred}./encrypt_files.sh [source dir/file] [destination dir] [filename (excluding extension)] [recipient email or key]${txtrst}"
     echo
     exit 1
 fi
@@ -30,7 +30,7 @@ fi
 if [ ! -s ${SOURCE} ]
 then
     echo
-    echo "${txtbld}${txtred}${SOURCE} does not exist or is empty!${txtrst}"
+    echo "${SOURCE} ${txtbld}${txtred}does not exist or is empty!${txtrst}"
     echo
     exit 1
 fi
@@ -38,8 +38,9 @@ fi
 # Set more variables
 DESDIR="${2}"			# [destination dir]
 FILENAME="${3}"			# [filename (excluding extension)]
-SAVEAS="${2}${3}${EXTENSION}"	# [destination dir]/[filename][extension]
+SAVEAS="${2}${3}${EXTENSION}"	# [destination dir]/[filename].[extension]
 RECIPIENT="${4}"		# Recipient's public GPG key or email address
+NOERRORS="All error checking passed, encrypting tarball with ${RECIPIENT} public gpg key"
 
 # Function to verify previous task completed successfully
 verify () {
@@ -50,7 +51,7 @@ then
     echo
 else
     echo
-    echo "${txtbld}${txtred}${FAILED}${txtrst}"
+    echo "${FAILED}}"
     echo
     exit 1
 fi
@@ -68,7 +69,7 @@ echo
 # Check to see of the {DESDIR} exists and you have write permissions
 # Variables for success/failure
 SUCCESS="${DESDIR} created successfully"
-FAILED="Creation of ${DESDIR} failed! Check your permissions."
+FAILED="${txtbld}${txtred}Creation of${txtrst} ${DESDIR} ${txtbld}${txtred}failed! Check your permissions.${txtrst}"
 if [ ! -w ${DESDIR} ]
 then
     echo
@@ -92,20 +93,20 @@ fi
 # Check to see if the {SOURCE} is ~/.  If so, assumes to exclude ~/VirtualBox_VMs and ~/Truecrypt_Volumes
 # Variables for success/failure
 SUCCESS="Encrypted tarball of ${SOURCE} completed successfully and saved as ${SAVEAS}."
-FAILED="Tarball and encryption of ${SOURCE} failed!"
+FAILED="${txtbld}${txtred}Tarball and encryption of${txtrst} ${SOURCE} ${txtbld}${txtred}failed!${txtrst}"
 if [ ${SOURCE} = ~/ ]
 then
     echo
-    echo The SOURCE is ~/ so excluding VirtualBox_VMs and Truecrypt_Volumes.
+    echo The SOURCE is ~/ so excluding ~/VirtualBox_VMs and ~/Truecrypt_Volumes.
     echo
-    echo "All error checking passed, encrypting tarball with ${RECIPIENT} public gpg key"
+    echo "${NOERRORS}"
     echo
     tar -cpJ --exclude ~/VirtualBox_VMs --exclude ~/Truecrypt_Volumes ${SOURCE} | gpg -e -r ${RECIPIENT} -o ${SAVEAS}
 else
     echo
     echo The SOURCE is NOT ~/ so no exclusions have been made.
     echo
-    echo "All error checking passed, encrypting tarball with ${RECIPIENT} public gpg key"
+    echo "${NOERRORS}"
     echo
     tar -cpJ ${SOURCE} | gpg -e -r ${RECIPIENT} -o ${SAVEAS}
 fi
@@ -116,7 +117,7 @@ verify
 # Prompt to sign with detached signature
 # Variables for success/failure
 SUCCESS='GPG signature successful'
-FAILED='GPG signature failed!'
+FAILED="${txtbld}${txtred}GPG signature failed!${txtrst}"
 echo
 echo 'Sign it with detached signature? (Y/n)'
 read answer

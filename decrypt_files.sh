@@ -27,7 +27,7 @@ then
     echo
 else
     echo
-    echo "${txtbld}${txtred}${FAILED}${txtrst}"
+    echo "${FAILED}"
     echo
     exit 1
 fi
@@ -68,7 +68,7 @@ fi
 # Check to see if {DESDIR} exists and is writable
 # Variables for success/failure
 SUCCESS="Creation of ${DESDIR} successful"
-FAILED="Creation of ${DESDIR} failed! Check your permissions"
+FAILED="${txtbld}${txtred}Creation of${txtrst} ${DESDIR} ${txtbld}${txtred}failed! Check your permissions${txtrst}"
 if [ ! -w ${DESDIR} ]
 then
     echo
@@ -96,7 +96,7 @@ OUTPUT=$(echo ${DECRYPT} | cut -f -3 -d '.')	#used for Decrypt Only option
 # Prompt for decryption only
 # Variables for success/failure
 SUCCESS="Decrypted ${DECRYPT} successfully and saved it as ${DESDIR}${OUTPUT}"
-FAILED="Decryption of ${DECRYPT} failed!"
+FAILED="${txtbld}${txtred}Decryption of${txtrst} ${DECRYPT} ${txtbld}${txtred}failed!${txtrst}"
 echo
 echo "Only decrypt ${DECRYPT} as ${OUTPUT} (no extraction)? (Y/n)"
 read answer
@@ -111,7 +111,7 @@ fi
 # Prompt to delete encrypted tarball after decrypt and extraction
 # Variables for success/failure
 SUCCESS="Decrypted ${DECRYPT} successfully to ${DESDIR}"
-FAILED="Decryption of ${DECRYPT} failed!"
+FAILED="${txtbld}${txtred}Decryption of${txtrst} ${DECRYPT} ${txtbld}${txtred}failed!${txtrst}"
 echo
 echo "Delete encrypted tarball ${DECRYPT} after decrypt and extraction? (Y/n)"
 read answer
