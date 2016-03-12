@@ -36,10 +36,10 @@ then
 fi
 
 # Set more variables
-DESDIR="${2}"			# [destination dir]
-FILENAME="${3}"			# [filename (excluding extension)]
-SAVEAS="${2}${3}${EXTENSION}"	# [destination dir]/[filename].[extension]
-RECIPIENT="${4}"		# Recipient's public GPG key or email address
+DESDIR="${2}"					# [destination dir]
+FILENAME="${3}"					# [filename (excluding extension)]
+SAVEAS="${DESDIR}${FILENAME}${EXTENSION}"	# [destination dir]/[filename].[extension]
+RECIPIENT="${4}"				# Recipient's public GPG key or email address
 NOERRORS="All error checking passed, encrypting tarball with ${RECIPIENT} public gpg key"
 
 # Function to verify previous task completed successfully
@@ -124,13 +124,12 @@ read answer
 if [ ${answer} = 'Y' ]
 then
     gpg --armor --detach-sig ${SAVEAS}
+    # Check to see if signing succeeded
+    verify
+    time_taken
 else
     echo
     time_taken
     exit 0
 fi
-
-# Check to see if signing succeeded
-verify
-time_taken
 #END

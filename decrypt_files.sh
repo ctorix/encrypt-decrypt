@@ -90,16 +90,17 @@ then
 fi
 
 # Set variables
-DECRYPT="${1}"			# [file to decrypt]
-DECRYPTED=${DECRYPT%.*}		# Removes .gpg from encrypted filename leaving .tar.xz (decryption only option)
-OUTPUT=$(basename ${DECRYPTED})	# Removes path from {DECRYPTED} leaving just filename (decryption only option)
+DECRYPT="${1}"				# [file to decrypt]
+DECRYPTED=${DECRYPT%.*}			# Removes .gpg from encrypted filename leaving .tar.xz (decryption only option)
+FILEOUTPUT=$(basename ${DECRYPTED})	# Removes path from {DECRYPTED} leaving just filename (decryption only option)
+OUTPUT=${DESDIR}${FILEOUTPUT}
 
 # Prompt for decryption only
 # Variables for success/failure
-SUCCESS="Decrypted ${DECRYPT} successfully and saved it as ${DESDIR}${OUTPUT}"
+SUCCESS="Decrypted ${DECRYPT} successfully and saved it as ${OUTPUT}"
 FAILED="${txtbld}${txtred}Decryption of${txtrst} ${DECRYPT} ${txtbld}${txtred}failed!${txtrst}"
 echo
-echo "Only decrypt ${DECRYPT} as ${DESDIR}${OUTPUT} (no extraction)? (Y/n)"
+echo "Only decrypt ${DECRYPT} as ${OUTPUT} (no extraction)? (Y/n)"
 read answer
 if [ ${answer} = 'Y' ]
 then
@@ -109,9 +110,9 @@ then
     read answer
     if [ ${answer} = 'Y' ]
     then
-        gpg -o ${DESDIR}${OUTPUT} -d ${DECRYPT} && rm ${DECRYPT}
+        gpg -o ${OUTPUT} -d ${DECRYPT} && rm ${DECRYPT}
     else
-        gpg -o ${DESDIR}${OUTPUT} -d ${DECRYPT}
+        gpg -o ${OUTPUT} -d ${DECRYPT}
     fi    
     verify
     time_taken
