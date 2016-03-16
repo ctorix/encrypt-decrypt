@@ -15,12 +15,22 @@
 START=$(date +%s)
 
 # Define text formatting variables:
-txtbld=$(tput bold)       # Bold
-txtred=$(tput setaf 1)    # Red
-txtrst=$(tput sgr0)       # Text reset
+txtbld=$(tput bold)       	# Bold
+txtred=$(tput setaf 1)    	# Red
+txtrst=$(tput sgr0)       	# Text reset
+txtbldred="${txtbld}${txtred}"	# Bold & Red
 
 # Set global variables
 DESDIR="${3}"			# [destination dir]
+
+# Array loop to add --exclude directories from tar
+EXCLUDES=()    				# start with an empty array
+for EXCL in "${@:6}"; do    		# for each extra argument...
+    EXCLUDES+=(--exclude "${EXCL}")    	# add an exclude to the array
+done
+
+# Set exclusions variable
+EXCLUSIONS="${EXCLUDES[@]}"
 
 # Function to verify previous task completed successfully
 verify () {
@@ -31,7 +41,7 @@ then
     echo
 else
     echo
-    echo "${FAILED}}"
+    echo "${FAILED}"
     echo
     exit 1
 fi
@@ -58,11 +68,11 @@ local SAVEAS="${DESDIR}${FILENAME}${EXTENSION}"		# [destination dir]/[filename].
 local RECIPIENT="${3}"					# Recipient's public GPG hex key or email address
 local NOERRORS="All error checking passed, encrypting tarball with ${RECIPIENT} public gpg key"
 
-# Check to see if 4 arguments are provided for [source dir/file] [destination dir] [filename (excluding extension)] and [recipient email or key]
+# Check to see if at least 4 arguments are provided for [source dir/file] [destination dir] [filename (excluding extension)] and [recipient email or key]
 if [ $# != 3 ]
 then
     echo
-    echo "Usage: ${txtbld}${txtred}./encrypt_files.sh [source dir/file] [destination dir] [filename (excluding extension)] [recipient email or key]${txtrst}"
+    echo "Usage: ${txtbldred}./encrypt_files.sh [source dir/file] [destination dir] [filename (excluding extension)] [recipient email or key] (optional: [dirs/files to exclude])${txtrst}"
     echo
     exit 1
 fi
@@ -71,7 +81,7 @@ fi
 if [ ! -s ${SOURCE} ]
 then
     echo
-    echo "${SOURCE} ${txtbld}${txtred}does not exist or is empty!${txtrst}"
+    echo "${SOURCE} ${txtbldred}does not exist or is empty!${txtrst}"
     echo
     exit 1
 fi
@@ -79,11 +89,11 @@ fi
 # Check to see of the {DESDIR} exists and you have write permissions
 # Variables for success/failure
 SUCCESS="${DESDIR} created successfully"
-FAILED="${txtbld}${txtred}Creation of${txtrst} ${DESDIR} ${txtbld}${txtred}failed! Check your permissions.${txtrst}"
+FAILED="${txtbldred}Creation of${txtrst} ${DESDIR} ${txtbldred}failed! Check your permissions.${txtrst}"
 if [ ! -w ${DESDIR} ]
 then
     echo
-    echo "${txtbld}${txtred}Destination directory${txtrst} ${DESDIR} ${txtbld}${txtred}does not exist or you do not have write permissions!${txtrst}"
+    echo "${txtbldred}Destination directory${txtrst} ${DESDIR} ${txtbldred}does not exist or you do not have write permissions!${txtrst}"
     echo
     echo 'Attempt to create it? (Y/n)'
     read answer
@@ -94,27 +104,27 @@ then
         verify
     else
         echo
-        echo "${txtbld}${txtred}Creation of${txtrst} ${DESDIR} ${txtbld}${txtred}declined... exiting...${txtrst}"
+        echo "${txtbldred}Creation of${txtrst} ${DESDIR} ${txtbldred}declined... exiting...${txtrst}"
         echo
         exit 1
     fi
 fi
 
-# Check to see if the {SOURCE} is ~/.  If so, assumes to exclude ~/VirtualBox_VMs and ~/Truecrypt_Volumes
+# Check to see if exclude arguments were provided
 # Variables for success/failure
 SUCCESS="Encrypted tarball of ${SOURCE} completed successfully and saved as ${SAVEAS}."
-FAILED="${txtbld}${txtred}Tarball and encryption of${txtrst} ${SOURCE} ${txtbld}${txtred}failed!${txtrst}"
-if [ ${SOURCE} = ~/ ]
+FAILED="${txtbldred}Tarball and encryption of${txtrst} ${SOURCE} ${txtbldred}failed!${txtrst}"
+if [ ! -z "${EXCLUSIONS}" ]
 then
     echo
-    echo The SOURCE is ~/ so excluding ~/VirtualBox_VMs and ~/Truecrypt_Volumes.
+    echo "Running with ${EXCLUSIONS}"
     echo
     echo "${NOERRORS}"
     echo
-    tar -cpJ --exclude ~/VirtualBox_VMs --exclude ~/Truecrypt_Volumes ${SOURCE} | gpg -e -r ${RECIPIENT} -o ${SAVEAS}
+    tar -cpJ ${EXCLUSIONS} ${SOURCE} | gpg -e -r ${RECIPIENT} -o ${SAVEAS}
 else
     echo
-    echo The SOURCE is NOT ~/ so no exclusions have been made.
+    echo 'No directories or files provided to exclude'
     echo
     echo "${NOERRORS}"
     echo
@@ -127,7 +137,7 @@ verify
 # Prompt to sign with detached signature
 # Variables for success/failure
 SUCCESS='GPG signature successful'
-FAILED="${txtbld}${txtred}GPG signature failed!${txtrst}"
+FAILED="${txtbldred}GPG signature failed!${txtrst}"
 echo
 echo 'Sign it with detached signature? (Y/n)'
 read answer
@@ -156,14 +166,7 @@ local DECRYPTED=${DECRYPT%.*}			# Removes .gpg from encrypted filename leaving .
 local FILEOUTPUT=$(basename ${DECRYPTED})	# Removes path from {DECRYPTED} leaving just filename (decryption only option)
 local OUTPUT=${DESDIR}${FILEOUTPUT}
 
-# Check to see if extract directory was supplied
-
-# Syntax of simple decryption and extraction
-# gpg -d ${DECRYPT} | tar -xpJf - -C ${DESDIR}
-
-# Syntax for decrypt only
-# gpg -o ${OUTPUT} -d ${DECRYPT}
-
+# Check to see if destination directory was supplied
 if [ -z "${2}" ]
 then
     DESDIR=$(pwd)
@@ -171,17 +174,17 @@ else
     DESDIR="${2}"
 fi
 
-# Check to see number of arguments provided for [file to decrypt] and [extract dir]
+# Check to see number of arguments provided for [file to decrypt] and [destination directory]
 if [ $# = 1 ]
 then
     echo
-    echo "${txtbld}${txtred}No extract directory provided!${txtrst}"
-    echo "${txtbld}${txtred}Extraction will be to:${txtrst} ${DESDIR}"
+    echo "${txtbldred}No destination directory provided!${txtrst}"
+    echo "${txtbldred}Destination directory will be:${txtrst} ${DESDIR}"
     echo
 elif [ $# != 2 ]
 then
     echo
-    echo "Usage: ${txtbld}${txtred}./decrypt_files.sh [file to decrypt] (optional: [extract dir])${txtrst}"
+    echo "Usage: ${txtbldred}./decrypt_files.sh [file to decrypt] (optional: [destination directory])${txtrst}"
     echo
     exit 1
 fi
@@ -189,11 +192,11 @@ fi
 # Check to see if {DESDIR} exists and is writable
 # Variables for success/failure
 SUCCESS="Creation of ${DESDIR} successful"
-FAILED="${txtbld}${txtred}Creation of${txtrst} ${DESDIR} ${txtbld}${txtred}failed! Check your permissions${txtrst}"
+FAILED="${txtbldred}Creation of${txtrst} ${DESDIR} ${txtbldred}failed! Check your permissions${txtrst}"
 if [ ! -w ${DESDIR} ]
 then
     echo
-    echo "${DESDIR} ${txtbld}${txtred}does not exist or you do not have write permissions!${txtrst}"
+    echo "${DESDIR} ${txtbldred}does not exist or you do not have write permissions!${txtrst}"
     # Offer to create ${DESDIR}
     echo
     echo 'Attempt to create it? (Y/n)'
@@ -204,7 +207,7 @@ then
         verify
     else
         echo
-        echo "${txtbld}${txtred}Creation of${txtrst} ${DESDIR} ${txtbld}${txtred}declined... exiting...${txtrst}"
+        echo "${txtbldred}Creation of${txtrst} ${DESDIR} ${txtbldred}declined... exiting...${txtrst}"
         echo
         exit 1
     fi
@@ -213,7 +216,7 @@ fi
 # Prompt for decryption only
 # Variables for success/failure
 SUCCESS="Decrypted ${DECRYPT} successfully and saved it as ${OUTPUT}"
-FAILED="${txtbld}${txtred}Decryption of${txtrst} ${DECRYPT} ${txtbld}${txtred}failed!${txtrst}"
+FAILED="${txtbldred}Decryption of${txtrst} ${DECRYPT} ${txtbldred}failed!${txtrst}"
 echo
 echo "Only decrypt ${DECRYPT} as ${OUTPUT} (no extraction)? (Y/n)"
 read answer
@@ -237,7 +240,7 @@ fi
 # Prompt to delete encrypted tarball after decrypt and extraction
 # Variables for success/failure
 SUCCESS="Decrypted ${DECRYPT} successfully to ${DESDIR}"
-FAILED="${txtbld}${txtred}Decryption of${txtrst} ${DECRYPT} ${txtbld}${txtred}failed!${txtrst}"
+FAILED="${txtbldred}Decryption of${txtrst} ${DECRYPT} ${txtbldred}failed!${txtrst}"
 echo
 echo "Delete encrypted tarball ${DECRYPT} after decrypt and extraction? (Y/n)"
 read answer
@@ -265,7 +268,7 @@ then
     decrypt ${2} ${3}
 else
     echo
-    echo "${txtbld}${txtred}Usage: ./encrypt-decrypt.sh encrypt (to encrypt) or ./encrypt-decrypt.sh decrypt (to decrypt)${txtrst}"
+    echo "${txtbldred}Usage: ./encrypt-decrypt.sh encrypt (to encrypt) or ./encrypt-decrypt.sh decrypt (to decrypt)${txtrst}"
     echo
     exit 1
 fi
