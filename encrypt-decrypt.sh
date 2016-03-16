@@ -15,10 +15,8 @@
 START=$(date +%s)
 
 # Define text formatting variables:
-txtbld=$(tput bold)       	# Bold
-txtred=$(tput setaf 1)    	# Red
-txtrst=$(tput sgr0)       	# Text reset
-txtbldred="${txtbld}${txtred}"	# Bold & Red
+txtbldred=$(tput bold && tput setaf 1)	# Bold & Red
+txtrst=$(tput sgr0)       		# Text reset
 
 # Set global variables
 DESDIR="${3}"			# [destination dir]
