@@ -6,10 +6,10 @@
 
 # Syntax
 # Encryption
-# encrypt {SOURCE} {DESDIR} [Filename] [Recipient email or hex key]
+# encrypt [Source] [Destination directory] [Filename] [Recipient email or hex key] (optional: [Directories/files to exclude])
 #
 # Decryption
-# decrypt [file to decrypt] (optional: [extract dir])
+# decrypt [File to decrypt] (optional: [Destination directory])
 
 # Set start time
 START=$(date +%s)
@@ -66,11 +66,11 @@ local SAVEAS="${DESDIR}${FILENAME}${EXTENSION}"		# [destination dir]/[filename].
 local RECIPIENT="${3}"					# Recipient's public GPG hex key or email address
 local NOERRORS="All error checking passed, encrypting tarball with ${RECIPIENT} public gpg key"
 
-# Check to see if at least 4 arguments are provided for [source dir/file] [destination dir] [filename (excluding extension)] and [recipient email or key]
+# Check to see if at least 4 arguments are provided for [source dir/file] [destination dir] [filename (excluding extensions)] and [recipient email or key]
 if [ $# != 3 ]
 then
     echo
-    echo "Usage: ${txtbldred}./encrypt_files.sh [source dir/file] [destination dir] [filename (excluding extension)] [recipient email or key] (optional: [dirs/files to exclude])${txtrst}"
+    echo "Usage: ${txtbldred}./encrypt_files.sh [source dir/file] [destination dir] [filename (excluding extensions)] [recipient email or key] (optional: [dirs/files to exclude])${txtrst}"
     echo
     exit 1
 fi
@@ -93,9 +93,9 @@ then
     echo
     echo "${txtbldred}Destination directory${txtrst} ${DESDIR} ${txtbldred}does not exist or you do not have write permissions!${txtrst}"
     echo
-    echo 'Attempt to create it? (Y/n)'
+    echo 'Attempt to create it? (y/N)'
     read answer
-    if [ ${answer} = 'Y' ]
+    if [ "${answer,,}" = 'y' ]
     then
         mkdir -p ${DESDIR}
         # Check to see if directory was created successfully
@@ -139,7 +139,7 @@ FAILED="${txtbldred}GPG signature failed!${txtrst}"
 echo
 echo 'Sign it with detached signature? (Y/n)'
 read answer
-if [ ${answer} = 'Y' ]
+if [ "${answer,,}" = 'y' ] || [ -z ${answer} ]
 then
     gpg --armor --detach-sig ${SAVEAS}
     # Check to see if signing succeeded
@@ -197,9 +197,9 @@ then
     echo "${DESDIR} ${txtbldred}does not exist or you do not have write permissions!${txtrst}"
     # Offer to create ${DESDIR}
     echo
-    echo 'Attempt to create it? (Y/n)'
+    echo 'Attempt to create it? (y/N)'
     read answer
-    if [ ${answer} = 'Y' ]
+    if [ "${answer,,}" = 'y' ]
     then
         mkdir -p ${DESDIR}
         verify
@@ -216,15 +216,15 @@ fi
 SUCCESS="Decrypted ${DECRYPT} successfully and saved it as ${OUTPUT}"
 FAILED="${txtbldred}Decryption of${txtrst} ${DECRYPT} ${txtbldred}failed!${txtrst}"
 echo
-echo "Only decrypt ${DECRYPT} as ${OUTPUT} (no extraction)? (Y/n)"
+echo "Only decrypt ${DECRYPT} as ${OUTPUT} (no extraction)? (y/N)"
 read answer
-if [ ${answer} = 'Y' ]
+if [ "${answer,,}" = 'y' ]
 then
     # Prompt to delete encrypted tarball ${DECRYPT} after decrypt
     echo
-    echo "Delete encrypted tarball ${DECRYPT} after decryption? (Y/n)"
+    echo "Delete encrypted tarball ${DECRYPT} after decryption? (y/N)"
     read answer
-    if [ ${answer} = 'Y' ]
+    if [ "${answer,,}" = 'y' ]
     then
         gpg -o ${OUTPUT} -d ${DECRYPT} && rm ${DECRYPT}
     else
@@ -240,9 +240,9 @@ fi
 SUCCESS="Decrypted ${DECRYPT} successfully to ${DESDIR}"
 FAILED="${txtbldred}Decryption of${txtrst} ${DECRYPT} ${txtbldred}failed!${txtrst}"
 echo
-echo "Delete encrypted tarball ${DECRYPT} after decrypt and extraction? (Y/n)"
+echo "Delete encrypted tarball ${DECRYPT} after decrypt and extraction? (y/N)"
 read answer
-if [ ${answer} = 'Y' ]
+if [ "${answer,,}" = 'y' ]
 then
     gpg -d ${DECRYPT} | tar -xpJf - -C ${DESDIR} && rm ${DECRYPT}
 else
