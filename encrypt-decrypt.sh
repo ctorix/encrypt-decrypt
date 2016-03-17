@@ -18,9 +18,6 @@ START=$(date +%s)
 txtbldred=$(tput bold && tput setaf 1)	# Bold & Red
 txtrst=$(tput sgr0)       		# Text reset
 
-# Set global variables
-DESDIR="${3}"			# [destination dir]
-
 # Array loop to add --exclude directories from tar
 EXCLUDES=()    				# start with an empty array
 for EXCL in "${@:6}"; do    		# for each extra argument...
@@ -61,6 +58,7 @@ encrypt () {
 local DATE=$(date +%Y%m%d)				# Setting the date used in filename extension
 local SOURCE="${1}"					# [source dir/file]
 local EXTENSION="_${DATE}.tar.xz.gpg"			# Setting the file extension
+local DESDIR="${2}"					# [destination directory]
 local FILENAME="${3}"					# [filename (excluding extension)]
 local SAVEAS="${DESDIR}${FILENAME}${EXTENSION}"		# [destination dir]/[filename].[extension]
 local RECIPIENT="${4}"					# Recipient's public GPG hex key or email address
@@ -160,6 +158,7 @@ decrypt () {
 
 # Set function variables
 local DECRYPT="${1}"				# [file to decrypt]
+local DESDIR="${2}"				# [destination directory]
 local DECRYPTED=${DECRYPT%.*}			# Removes .gpg from encrypted filename leaving .tar.xz (decryption only option)
 local FILEOUTPUT=$(basename ${DECRYPTED})	# Removes path from {DECRYPTED} leaving just filename (decryption only option)
 local OUTPUT=${DESDIR}${FILEOUTPUT}
@@ -258,10 +257,10 @@ time_taken
 # Begin Encryption or Decryption
 if [ "${1}" = 'encrypt' ]
 then
-    encrypt ${2} ${DESDIR} ${4} ${5}
+    encrypt ${2} ${3} ${4} ${5}
 elif [ "${1}" = 'decrypt' ]
 then
-    decrypt ${2} ${DESDIR}
+    decrypt ${2} ${3}
 else
     echo
     echo "${txtbldred}Usage: ./encrypt-decrypt.sh encrypt (to encrypt) or ./encrypt-decrypt.sh decrypt (to decrypt)${txtrst}"
