@@ -61,13 +61,13 @@ encrypt () {
 local DATE=$(date +%Y%m%d)				# Setting the date used in filename extension
 local SOURCE="${1}"					# [source dir/file]
 local EXTENSION="_${DATE}.tar.xz.gpg"			# Setting the file extension
-local FILENAME="${2}"					# [filename (excluding extension)]
+local FILENAME="${3}"					# [filename (excluding extension)]
 local SAVEAS="${DESDIR}${FILENAME}${EXTENSION}"		# [destination dir]/[filename].[extension]
-local RECIPIENT="${3}"					# Recipient's public GPG hex key or email address
+local RECIPIENT="${4}"					# Recipient's public GPG hex key or email address
 local NOERRORS="All error checking passed, encrypting tarball with ${RECIPIENT} public gpg key"
 
 # Check to see if at least 4 arguments are provided for [source dir/file] [destination dir] [filename (excluding extensions)] and [recipient email or key]
-if [ $# != 3 ]
+if [ $# != 4 ]
 then
     echo
     echo "Usage: ${txtbldred}./encrypt_files.sh [source dir/file] [destination dir] [filename (excluding extensions)] [recipient email or key] (optional: [dirs/files to exclude])${txtrst}"
@@ -165,11 +165,9 @@ local FILEOUTPUT=$(basename ${DECRYPTED})	# Removes path from {DECRYPTED} leavin
 local OUTPUT=${DESDIR}${FILEOUTPUT}
 
 # Check to see if destination directory was supplied
-if [ -z "${2}" ]
+if [ -z "${DESDIR}" ]
 then
     DESDIR=$(pwd)
-else
-    DESDIR="${2}"
 fi
 
 # Check to see number of arguments provided for [file to decrypt] and [destination directory]
@@ -260,10 +258,10 @@ time_taken
 # Begin Encryption or Decryption
 if [ "${1}" = 'encrypt' ]
 then
-    encrypt ${2} ${4} ${5}
+    encrypt ${2} ${DESDIR} ${4} ${5}
 elif [ "${1}" = 'decrypt' ]
 then
-    decrypt ${2} ${3}
+    decrypt ${2} ${DESDIR}
 else
     echo
     echo "${txtbldred}Usage: ./encrypt-decrypt.sh encrypt (to encrypt) or ./encrypt-decrypt.sh decrypt (to decrypt)${txtrst}"
