@@ -169,7 +169,7 @@ decrypt () {
 # Set function variables
 local DECRYPT="${1}"				# [file to decrypt]
 local DESDIR="${2}"				# [destination directory]
-#desdir_check					# Check DESDIR for ending /
+desdir_check					# Check DESDIR for ending /
 local DECRYPTED=${DECRYPT%.*}			# Removes .gpg from encrypted filename leaving .tar.xz (decryption only option)
 local FILEOUTPUT=$(basename ${DECRYPTED})	# Removes path from {DECRYPTED} leaving just filename (decryption only option)
 local OUTPUT=${DESDIR}${FILEOUTPUT}
