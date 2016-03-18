@@ -1,5 +1,5 @@
 #!/bin/bash
-#Purpose = tar and encrypt with a public gpg key
+#Purpose = tar/encrypt and decrypt with public gpg keys
 #Created on 03-04-2016
 #Author = Cade Torix
 #START
@@ -20,7 +20,8 @@ txtrst=$(tput sgr0)       		# Text reset
 
 # Array loop to add --exclude directories from tar
 EXCLUDES=()    				# start with an empty array
-for EXCL in "${@:6}"; do    		# for each extra argument...
+for EXCL in "${@:6}"			# for each extra argument...
+do
     EXCLUDES+=(--exclude "${EXCL}")    	# add an exclude to the array
 done
 
@@ -51,6 +52,14 @@ echo "Total time: ${TOTALTIME} minutes."
 echo
 }
 
+# Function to check to see if DESDIR ends in / (should only apply to new directories)
+desdir_check () {
+if [ "${DESDIR: -1}" != "/" ] && [ ! -z ${DESDIR} ]
+then
+    DESDIR="${DESDIR}/"
+fi
+}
+
 ################## Begin encryption function ##################
 
 encrypt () {
@@ -59,6 +68,7 @@ local DATE=$(date +%Y%m%d)				# Setting the date used in filename extension
 local SOURCE="${1}"					# [source dir/file]
 local EXTENSION="_${DATE}.tar.xz.gpg"			# Setting the file extension
 local DESDIR="${2}"					# [destination directory]
+desdir_check						# Check DESDIR for ending /
 local FILENAME="${3}"					# [filename (excluding extension)]
 local SAVEAS="${DESDIR}${FILENAME}${EXTENSION}"		# [destination dir]/[filename].[extension]
 local RECIPIENT="${4}"					# Recipient's public GPG hex key or email address
@@ -159,6 +169,7 @@ decrypt () {
 # Set function variables
 local DECRYPT="${1}"				# [file to decrypt]
 local DESDIR="${2}"				# [destination directory]
+#desdir_check					# Check DESDIR for ending /
 local DECRYPTED=${DECRYPT%.*}			# Removes .gpg from encrypted filename leaving .tar.xz (decryption only option)
 local FILEOUTPUT=$(basename ${DECRYPTED})	# Removes path from {DECRYPTED} leaving just filename (decryption only option)
 local OUTPUT=${DESDIR}${FILEOUTPUT}
