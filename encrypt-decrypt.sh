@@ -84,7 +84,7 @@ then
 fi
 
 # Check to see if the {SOURCE} exists
-if [ ! -s ${SOURCE} ]
+if [ ! -s ${SOURCE} ] || [ -z "$(ls -A ${SOURCE})"  ]
 then
     echo
     echo "${SOURCE} ${txtbldred}does not exist or is empty!${txtrst}"
