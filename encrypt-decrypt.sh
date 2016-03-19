@@ -22,6 +22,12 @@ txtrst=$(tput sgr0)       		# Text reset
 EXCLUDES=()    				# start with an empty array
 for EXCL in "${@:6}"			# for each extra argument...
 do
+# If --exclude directories end in / remove it
+if [ "${EXCL: -1}" = "/" ]
+then
+    EXCL=${EXCL::-1}
+fi
+# finish building array of exclusions
     EXCLUDES+=(--exclude "${EXCL}")    	# add an exclude to the array
 done
 
