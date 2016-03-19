@@ -12,15 +12,11 @@ Sample:
 
    This will tar and encrypt ~/ (excluding the directory ~/do_not_include_this_dir) with no@email.com's public gpg key, place the encrypted file in /tmp/encrypted_files/ (offering to create it if it doesn't exist) and name it my_first_file_{today's date}.tar.xz.gpg
 
-# Important:
-
-   If you're excluding directories remember to leave the trailing / off of the path to exclude (see example above)
-
 # Basic decryption syntax:
 
    ./encrypt-decrypt.sh decrypt [source] (Optional: [destination directory])
 
-# Sample:
+Sample:
 
    ./encrypt-decrypt.sh decrypt /tmp/encrypted_files/my_first_file_20160316.tar.xz.gpg /tmp/decrypted_files/
 
