@@ -43,7 +43,7 @@ then
     echo
 else
     echo
-    echo "${FAILED}"
+    echo "${FAILED}" 1>&2
     echo
     exit 1
 fi
@@ -93,7 +93,7 @@ fi
 if [ ! -s ${SOURCE} ] || [ -z "$(ls -A ${SOURCE})"  ]
 then
     echo
-    echo "${SOURCE} ${txtbldred}does not exist or is empty!${txtrst}"
+    echo "${SOURCE} ${txtbldred}does not exist or is empty!${txtrst}" 1>&2
     echo
     exit 1
 fi
@@ -105,13 +105,13 @@ FAILED="${txtbldred}Creation of${txtrst} ${DESDIR} ${txtbldred}failed! Check you
 if [ ! -w ${DESDIR} ]
 then
     echo
-    echo "${txtbldred}Destination directory${txtrst} ${DESDIR} ${txtbldred}does not exist or you do not have write permissions!${txtrst}"
+    echo "${txtbldred}Destination directory${txtrst} ${DESDIR} ${txtbldred}does not exist or you do not have write permissions!${txtrst}" 1>&2
     echo
     echo 'Attempt to create it? (y/N)'
     read answer
     if [ "${answer,,}" = 'y' ]
     then
-        mkdir -p ${DESDIR}
+        mkdir -p ${DESDIR} 2> /dev/null
         # Check to see if directory was created successfully
         verify
     else
@@ -208,14 +208,14 @@ FAILED="${txtbldred}Creation of${txtrst} ${DESDIR} ${txtbldred}failed! Check you
 if [ ! -w ${DESDIR} ]
 then
     echo
-    echo "${DESDIR} ${txtbldred}does not exist or you do not have write permissions!${txtrst}"
+    echo "${DESDIR} ${txtbldred}does not exist or you do not have write permissions!${txtrst}" 1>&2
     # Offer to create ${DESDIR}
     echo
     echo 'Attempt to create it? (y/N)'
     read answer
     if [ "${answer,,}" = 'y' ]
     then
-        mkdir -p ${DESDIR}
+        mkdir -p ${DESDIR} 2> /dev/null
         verify
     else
         echo
