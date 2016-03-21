@@ -23,7 +23,7 @@ EXCLUDES=()    				# start with an empty array
 for EXCL in "${@:6}"			# for each extra argument...
 do
 # If --exclude directories end in / remove it
-if [ "${EXCL: -1}" = "/" ]
+if [ "${EXCL: -1}" = '/' ]
 then
     EXCL=${EXCL::-1}
 fi
@@ -60,7 +60,7 @@ echo
 
 # Function to check to see if DESDIR ends in / (should only apply to new directories)
 desdir_check () {
-if [ "${DESDIR: -1}" != "/" ] && [ ! -z ${DESDIR} ]
+if [ "${DESDIR: -1}" != '/' ] && [ ! -z "${DESDIR}" ]
 then
     DESDIR="${DESDIR}/"
 fi
@@ -70,11 +70,9 @@ fi
 
 encrypt () {
 # Set function variables
-local DATE=$(date +%Y%m%d)				# Setting the date used in filename extension
 local SOURCE="${1}"					# [source dir/file]
-local EXTENSION="_${DATE}.tar.xz.gpg"			# Setting the file extension
-local DESDIR="${2}"					# [destination directory]
-desdir_check						# Check DESDIR for ending /
+local EXTENSION="_$(date +%Y%m%d).tar.xz.gpg"		# Setting the file extension
+local DESDIR="${2}"; desdir_check			# [destination directory] and check DESDIR for ending /
 local FILENAME="${3}"					# [filename (excluding extension)]
 local SAVEAS="${DESDIR}${FILENAME}${EXTENSION}"		# [destination dir]/[filename].[extension]
 local RECIPIENT="${4}"					# Recipient's public GPG hex key or email address
@@ -90,7 +88,7 @@ then
 fi
 
 # Check to see if the {SOURCE} exists
-if [ ! -s ${SOURCE} ] || [ -z "$(ls -A ${SOURCE})"  ]
+if [ ! -s "${SOURCE}" ] || [ -z "$(ls -A ${SOURCE})"  ]
 then
     echo
     echo "${SOURCE} ${txtbldred}does not exist or is empty!${txtrst}" 1>&2
@@ -102,16 +100,16 @@ fi
 # Variables for success/failure
 SUCCESS="${DESDIR} created successfully"
 FAILED="${txtbldred}Creation of${txtrst} ${DESDIR} ${txtbldred}failed! Check your permissions.${txtrst}"
-if [ ! -w ${DESDIR} ]
+if [ ! -w "${DESDIR}" ]
 then
     echo
     echo "${txtbldred}Destination directory${txtrst} ${DESDIR} ${txtbldred}does not exist or you do not have write permissions!${txtrst}" 1>&2
     echo
     echo 'Attempt to create it? (y/N)'
-    read answer
-    if [ "${answer,,}" = 'y' ]
+    read ANSWER
+    if [ "${ANSWER,,}" = 'y' ]
     then
-        mkdir -p ${DESDIR} 2> /dev/null
+        mkdir -p "${DESDIR}" 2> /dev/null
         # Check to see if directory was created successfully
         verify
     else
@@ -133,14 +131,14 @@ then
     echo
     echo "${NOERRORS}"
     echo
-    tar -cpJ ${EXCLUSIONS} ${SOURCE} | gpg -e -r ${RECIPIENT} -o ${SAVEAS}
+    tar -cpJ ${EXCLUSIONS} "${SOURCE}" | gpg -e -r "${RECIPIENT}" -o "${SAVEAS}"
 else
     echo
     echo 'No directories or files provided to exclude'
     echo
     echo "${NOERRORS}"
     echo
-    tar -cpJ ${SOURCE} | gpg -e -r ${RECIPIENT} -o ${SAVEAS}
+    tar -cpJ "${SOURCE}" | gpg -e -r "${RECIPIENT}" -o "${SAVEAS}"
 fi
 
 # Check to see if tarball encryption was a success
@@ -152,10 +150,10 @@ SUCCESS='GPG signature successful'
 FAILED="${txtbldred}GPG signature failed!${txtrst}"
 echo
 echo 'Sign it with detached signature? (Y/n)'
-read answer
-if [ "${answer,,}" = 'y' ] || [ -z ${answer} ]
+read ANSWER
+if [ "${ANSWER,,}" = 'y' ] || [ -z "${ANSWER}" ]
 then
-    gpg --armor --detach-sig ${SAVEAS}
+    gpg --armor --detach-sig "${SAVEAS}"
     # Check to see if signing succeeded
     verify
     time_taken
@@ -174,11 +172,10 @@ decrypt () {
 
 # Set function variables
 local DECRYPT="${1}"				# [file to decrypt]
-local DESDIR="${2}"				# [destination directory]
-desdir_check					# Check DESDIR for ending /
-local DECRYPTED=${DECRYPT%.*}			# Removes .gpg from encrypted filename leaving .tar.xz (decryption only option)
-local FILEOUTPUT=$(basename ${DECRYPTED})	# Removes path from {DECRYPTED} leaving just filename (decryption only option)
-local OUTPUT=${DESDIR}${FILEOUTPUT}
+local DESDIR="${2}"; desdir_check		# [destination directory] and check DESDIR for ending /
+local DECRYPTED="${DECRYPT%.*}"			# Removes .gpg from encrypted filename leaving .tar.xz (decryption only option)
+local FILEOUTPUT=$(basename "${DECRYPTED}")	# Removes path from {DECRYPTED} leaving just filename (decryption only option)
+local OUTPUT="${DESDIR}${FILEOUTPUT}"
 
 # Check to see if destination directory was supplied
 if [ -z "${DESDIR}" ]
@@ -205,17 +202,17 @@ fi
 # Variables for success/failure
 SUCCESS="Creation of ${DESDIR} successful"
 FAILED="${txtbldred}Creation of${txtrst} ${DESDIR} ${txtbldred}failed! Check your permissions${txtrst}"
-if [ ! -w ${DESDIR} ]
+if [ ! -w "${DESDIR}" ]
 then
     echo
     echo "${DESDIR} ${txtbldred}does not exist or you do not have write permissions!${txtrst}" 1>&2
     # Offer to create ${DESDIR}
     echo
     echo 'Attempt to create it? (y/N)'
-    read answer
-    if [ "${answer,,}" = 'y' ]
+    read ANSWER
+    if [ "${ANSWER,,}" = 'y' ]
     then
-        mkdir -p ${DESDIR} 2> /dev/null
+        mkdir -p "${DESDIR}" 2> /dev/null
         verify
     else
         echo
@@ -231,18 +228,18 @@ SUCCESS="Decrypted ${DECRYPT} successfully and saved it as ${OUTPUT}"
 FAILED="${txtbldred}Decryption of${txtrst} ${DECRYPT} ${txtbldred}failed!${txtrst}"
 echo
 echo "Only decrypt ${DECRYPT} as ${OUTPUT} (no extraction)? (y/N)"
-read answer
-if [ "${answer,,}" = 'y' ]
+read ANSWER
+if [ "${ANSWER,,}" = 'y' ]
 then
     # Prompt to delete encrypted tarball ${DECRYPT} after decrypt
     echo
     echo "Delete encrypted tarball ${DECRYPT} after decryption? (y/N)"
-    read answer
-    if [ "${answer,,}" = 'y' ]
+    read ANSWER
+    if [ "${ANSWER,,}" = 'y' ]
     then
-        gpg -o ${OUTPUT} -d ${DECRYPT} && rm ${DECRYPT}
+        gpg -o "${OUTPUT}" -d "${DECRYPT}" && rm "${DECRYPT}"
     else
-        gpg -o ${OUTPUT} -d ${DECRYPT}
+        gpg -o "${OUTPUT}" -d "${DECRYPT}"
     fi    
     verify
     time_taken
@@ -255,12 +252,12 @@ SUCCESS="Decrypted ${DECRYPT} successfully to ${DESDIR}"
 FAILED="${txtbldred}Decryption of${txtrst} ${DECRYPT} ${txtbldred}failed!${txtrst}"
 echo
 echo "Delete encrypted tarball ${DECRYPT} after decrypt and extraction? (y/N)"
-read answer
-if [ "${answer,,}" = 'y' ]
+read ANSWER
+if [ "${ANSWER,,}" = 'y' ]
 then
-    gpg -d ${DECRYPT} | tar -xpJf - -C ${DESDIR} && rm ${DECRYPT}
+    gpg -d "${DECRYPT}" | tar -xpJf - -C "${DESDIR}" && rm "${DECRYPT}"
 else
-    gpg -d ${DECRYPT} | tar -xpJf - -C ${DESDIR}
+    gpg -d "${DECRYPT}" | tar -xpJf - -C "${DESDIR}"
 fi
 
 # Check to see if decrypt/extract & delete (if applicable) completed successfully
