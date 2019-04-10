@@ -82,7 +82,7 @@ local NOERRORS="All error checking passed, encrypting tarball with ${RECIPIENT} 
 if [ $# != 4 ]
 then
     echo
-    echo "Usage: ${txtbldred}./encrypt_files.sh [source dir/file] [destination dir] [filename (excluding extensions)] [recipient email or key] (optional: [dirs/files to exclude])${txtrst}"
+    echo "Usage: ${txtbldred}./encrypt-decrypt.sh encrypt [source dir/file] [destination dir] [filename (excluding extensions)] [recipient email or key] (optional: [dirs/files to exclude])${txtrst}"
     echo
     exit 1
 fi
@@ -193,7 +193,7 @@ then
 elif [ $# != 2 ]
 then
     echo
-    echo "Usage: ${txtbldred}./decrypt_files.sh [file to decrypt] (optional: [destination directory])${txtrst}"
+    echo "Usage: ${txtbldred}./encrypt-decrypt.sh decrypt [file to decrypt] (optional: [destination directory])${txtrst}"
     echo
     exit 1
 fi
